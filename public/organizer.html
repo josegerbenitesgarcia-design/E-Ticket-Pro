@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Panel de Organizador</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
+    <link rel="stylesheet" href="css/style.css">
+</head>
+
+<body class="bg-light">
+
+    <div class="container-fluid">
+        <div class="row">
+            <nav class="col-md-3 col-lg-2 d-md-block sidebar collapse p-3">
+                <h4 class="text-white mb-4 fw-bold px-2">ORGANIZADOR</h4>
+                <div class="text-white-50 px-2 mb-3 small">
+                    Hola, <span id="nombre-usuario" class="text-white fw-bold">...</span>
+                </div>
+                <ul class="nav flex-column">
+                    <li class="nav-item mb-2">
+                        <a class="nav-link active" href="#" onclick="mostrarSeccion('crear', this)">
+                            <i class="bi bi-plus-circle"></i> Crear Evento
+                        </a>
+                    </li>
+                    <li class="nav-item mb-2">
+                        <a class="nav-link" href="#" onclick="mostrarSeccion('listar', this)">
+                            <i class="bi bi-calendar-event"></i> Mis Eventos
+                        </a>
+                    </li>
+                    <li class="nav-item mt-5">
+                        <a class="nav-link text-danger" href="#" onclick="cerrarSesionOrg()">
+                            <i class="bi bi-box-arrow-left"></i> Cerrar Sesión
+                        </a>
+                    </li>
+                </ul>
+            </nav>
+
+            <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4 py-4">
+
+                <div id="seccion-crear">
+                    <h2 class="mb-4 text-dark fw-bold">Publicar Nuevo Evento</h2>
+                    <div class="card card-form p-4">
+                        <form action="/api/events/create" method="POST">
+                            <div class="row mb-3">
+                                <div class="col-md-8">
+                                    <label class="form-label">Nombre del Evento</label>
+                                    <input type="text" name="nombre_evento" class="form-control" required>
+                                </div>
+                                <div class="col-md-4">
+                                    <label class="form-label">Categoría</label>
+                                    <select name="categoria" class="form-select" required>
+                                        <option value="Musica">Música</option>
+                                        <option value="Deportes">Deportes</option>
+                                        <option value="Teatro">Teatro</option>
+                                        <option value="Stand-up">Stand-up</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="row mb-3">
+                                <div class="col-md-4"><label class="form-label">Fecha</label><input type="date"
+                                        name="fecha_evento" class="form-control" required></div>
+                                <div class="col-md-4"><label class="form-label">Hora</label><input type="time"
+                                        name="hora_evento" class="form-control" required></div>
+                                <div class="col-md-4"><label class="form-label">Lugar</label><input type="text"
+                                        name="lugar" class="form-control" required></div>
+                            </div>
+                            <div class="row mb-3 p-3 bg-light rounded border mx-1">
+                                <h6 class="text-primary mb-3">Configuración del Ticket</h6>
+                                <div class="col-md-6"><label class="form-label">Precio (S/.)</label><input type="number"
+                                        name="precio" class="form-control" step="0.01" required></div>
+                                <div class="col-md-6"><label class="form-label">Stock</label><input type="number"
+                                        name="capacidad" class="form-control" required></div>
+                            </div>
+                            <div class="mb-3"><label class="form-label">URL Imagen</label><input type="url"
+                                    name="imagen_url" class="form-control"></div>
+                            <div class="mb-4"><label class="form-label">Descripción</label><textarea name="descripcion"
+                                    class="form-control" rows="3" required></textarea></div>
+                            <input type="hidden" name="id_organizador" id="input_organizador_id">
+                            <button type="submit" class="btn btn-primary w-100 fw-bold">Publicar Evento</button>
+                        </form>
+                    </div>
+                </div>
+
+                <div id="seccion-listar" style="display: none;">
+                    <h2 class="mb-4 text-dark fw-bold">Mis Eventos Publicados</h2>
+                    <div class="card card-form p-4">
+                        <div class="table-responsive">
+                            <table class="table table-hover align-middle">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th>ID</th>
+                                        <th>Evento</th>
+                                        <th>Fecha</th>
+                                        <th>Lugar</th>
+                                        <th>Acciones</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="tabla-eventos-body"></tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="seccion-editar" style="display: none;">
+                    <div class="d-flex justify-content-between align-items-center mb-4">
+                        <h2 class="text-dark fw-bold">Editar Evento</h2>
+                        <button class="btn btn-secondary btn-sm" onclick="mostrarSeccion('listar')">Cancelar</button>
+                    </div>
+
+                    <div class="card card-form p-4 border-warning border-2">
+                        <form id="form-editar">
+                            <input type="hidden" id="edit_id_evento">
+                            <div class="mb-3">
+                                <label class="form-label fw-bold">Nombre</label>
+                                <input type="text" id="edit_nombre" class="form-control" required>
+                            </div>
+                            <div class="row mb-3">
+                                <div class="col-md-6">
+                                    <label class="form-label fw-bold">Categoría</label>
+                                    <select id="edit_categoria" class="form-select" required>
+                                        <option value="Musica">Música</option>
+                                        <option value="Deportes">Deportes</option>
+                                        <option value="Teatro">Teatro</option>
+                                        <option value="Stand-up">Stand-up</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label fw-bold">Lugar</label>
+                                    <input type="text" id="edit_lugar" class="form-control" required>
+                                </div>
+                            </div>
+                            <div class="row mb-3">
+                                <div class="col-6"><label class="form-label fw-bold">Fecha</label><input type="date"
+                                        id="edit_fecha" class="form-control" required></div>
+                                <div class="col-6"><label class="form-label fw-bold">Hora</label><input type="time"
+                                        id="edit_hora" class="form-control" required></div>
+                            </div>
+                            <div class="row mb-3 p-3 bg-light rounded border mx-1">
+                                <h6 class="text-warning mb-3 fw-bold"><i class="bi bi-pencil-square"></i> Editar Ticket
+                                </h6>
+                                <div class="col-md-6"><label class="form-label">Precio (S/.)</label><input type="number"
+                                        id="edit_precio" class="form-control" step="0.01" required></div>
+                                <div class="col-md-6"><label class="form-label">Stock Total</label><input type="number"
+                                        id="edit_capacidad" class="form-control" required></div>
+                            </div>
+                            <div class="mb-3"><label class="form-label fw-bold">URL Imagen</label><input type="url"
+                                    id="edit_imagen" class="form-control"></div>
+                            <div class="mb-3"><label class="form-label fw-bold">Descripción</label><textarea
+                                    id="edit_descripcion" class="form-control" rows="3" required></textarea></div>
+
+                            <button type="button" class="btn btn-warning w-100 fw-bold text-dark"
+                                onclick="guardarEdicion()">
+                                <i class="bi bi-save"></i> Guardar Cambios
+                            </button>
+                        </form>
+                    </div>
+                </div>
+
+            </main>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+    <script>
+        function cerrarSesionOrg() {
+            localStorage.clear();
+            window.location.href = '/';
+        }
+
+        const userId = localStorage.getItem('userId');
+        const userName = localStorage.getItem('userName');
+
+        if (!userId) window.location.href = '/login';
+        document.getElementById('nombre-usuario').textContent = userName || 'Organizador';
+        document.getElementById('input_organizador_id').value = userId;
+
+        function mostrarSeccion(seccion, elementoLink) {
+            document.getElementById('seccion-crear').style.display = 'none';
+            document.getElementById('seccion-listar').style.display = 'none';
+            document.getElementById('seccion-editar').style.display = 'none';
+
+            if (elementoLink) {
+                document.querySelectorAll('.nav-link').forEach(link => link.classList.remove('active'));
+                elementoLink.classList.add('active');
+            }
+
+            if (seccion === 'crear') {
+                document.getElementById('seccion-crear').style.display = 'block';
+            } else if (seccion === 'listar') {
+                document.getElementById('seccion-listar').style.display = 'block';
+                cargarMisEventos();
+            } else if (seccion === 'editar') {
+                document.getElementById('seccion-editar').style.display = 'block';
+            }
+        }
+
+        async function cargarMisEventos() {
+            const tbody = document.getElementById('tabla-eventos-body');
+            tbody.innerHTML = '<tr><td colspan="5" class="text-center">Cargando...</td></tr>';
+            try {
+                const response = await fetch(`/api/events/organizer/${userId}`);
+                const eventos = await response.json();
+                tbody.innerHTML = '';
+                if (eventos.length === 0) {
+                    tbody.innerHTML = '<tr><td colspan="5" class="text-center text-muted">Aún no has creado eventos.</td></tr>';
+                    return;
+                }
+                eventos.forEach(ev => {
+                    const fecha = new Date(ev.fecha_evento).toLocaleDateString();
+                    tbody.innerHTML += `
+                    <tr>
+                        <td>#${ev.id_evento}</td>
+                        <td class="fw-bold">${ev.nombre_evento}</td>
+                        <td>${fecha}</td>
+                        <td>${ev.lugar}</td>
+                        <td>
+                            <button class="btn btn-sm btn-outline-warning" onclick="prepararEdicion(${ev.id_evento})"><i class="bi bi-pencil"></i></button>
+                            <button class="btn btn-sm btn-outline-danger" onclick="eliminarEvento(${ev.id_evento})"><i class="bi bi-trash"></i></button>
+                        </td>
+                    </tr>`;
+                });
+            } catch (error) { console.error(error); }
+        }
+
+        async function eliminarEvento(id) {
+            if (confirm('¿Eliminar evento?')) {
+                await fetch(`/api/events/delete/${id}`, { method: 'DELETE' });
+                cargarMisEventos();
+            }
+        }
+
+        async function prepararEdicion(id) {
+            try {
+                const res = await fetch(`/api/events/${id}`);
+                const ev = await res.json();
+                document.getElementById('edit_id_evento').value = ev.id_evento;
+                document.getElementById('edit_nombre').value = ev.nombre_evento;
+                document.getElementById('edit_lugar').value = ev.lugar;
+                document.getElementById('edit_imagen').value = ev.imagen_url;
+                document.getElementById('edit_descripcion').value = ev.descripcion;
+                document.getElementById('edit_categoria').value = ev.categoria;
+                if (ev.fecha_evento) document.getElementById('edit_fecha').value = new Date(ev.fecha_evento).toISOString().split('T')[0];
+                document.getElementById('edit_hora').value = ev.hora_evento;
+                document.getElementById('edit_precio').value = ev.precio || 0;
+                document.getElementById('edit_capacidad').value = ev.capacidad || 0;
+                mostrarSeccion('editar');
+            } catch (error) { console.error(error); alert("Error al cargar datos"); }
+        }
+
+        async function guardarEdicion() {
+            const id = document.getElementById('edit_id_evento').value;
+            const data = {
+                nombre_evento: document.getElementById('edit_nombre').value,
+                categoria: document.getElementById('edit_categoria').value,
+                fecha_evento: document.getElementById('edit_fecha').value,
+                hora_evento: document.getElementById('edit_hora').value,
+                lugar: document.getElementById('edit_lugar').value,
+                imagen_url: document.getElementById('edit_imagen').value,
+                descripcion: document.getElementById('edit_descripcion').value,
+                precio: document.getElementById('edit_precio').value,
+                capacidad: document.getElementById('edit_capacidad').value
+            };
+            try {
+                const res = await fetch(`/api/events/update/${id}`, { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(data) });
+                if (res.ok) { alert('Evento actualizado'); mostrarSeccion('listar'); } else { alert('Error al actualizar'); }
+            } catch (error) { alert('Error de conexión'); }
+        }
+    </script>
+
+</body>
+
+</html>

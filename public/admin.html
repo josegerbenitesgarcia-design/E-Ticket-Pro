@@ -1,0 +1,468 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Panel Administrador</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
+    <link rel="stylesheet" href="css/style.css">
+</head>
+
+<body class="bg-light">
+
+    <div class="container-fluid">
+        <div class="row">
+            <nav class="col-md-3 col-lg-2 d-md-block sidebar collapse p-3">
+                <h4 class="text-white mb-4 fw-bold px-2">ADMINISTRADOR</h4>
+                <ul class="nav flex-column">
+                    <li class="nav-item mb-2">
+                        <a class="nav-link active" href="#" onclick="mostrarSeccion('usuarios', this)">
+                            <i class="bi bi-people-fill"></i> Usuarios
+                        </a>
+                    </li>
+                    <li class="nav-item mb-2">
+                        <a class="nav-link" href="#" onclick="mostrarSeccion('eventos', this)">
+                            <i class="bi bi-calendar3"></i> Eventos
+                        </a>
+                    </li>
+                    <li class="nav-item mb-2">
+                        <a class="nav-link" href="#" onclick="mostrarSeccion('ventas', this)">
+                            <i class="bi bi-cash-coin"></i> Ventas
+                        </a>
+                    </li>
+                    <li class="nav-item mt-5">
+                        <a class="nav-link text-danger" href="#" onclick="cerrarSesionAdmin()">
+                            <i class="bi bi-box-arrow-left"></i> Cerrar Sesión
+                        </a>
+                    </li>
+                </ul>
+            </nav>
+
+            <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4 py-4">
+
+                <div id="seccion-usuarios">
+                    <div class="d-flex justify-content-between align-items-center mb-4">
+                        <h2 class="fw-bold">Gestión de Usuarios</h2>
+                        <button class="btn btn-success fw-bold" onclick="abrirModalCrear()">
+                            <i class="bi bi-person-plus-fill"></i> Nuevo Usuario
+                        </button>
+                    </div>
+                    <div class="card card-form p-4">
+                        <div class="table-responsive">
+                            <table class="table table-hover align-middle">
+                                <thead class="table-dark">
+                                    <tr>
+                                        <th>ID</th>
+                                        <th>Nombre</th>
+                                        <th>Correo</th>
+                                        <th>Rol</th>
+                                        <th>Acciones</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="tabla-usuarios"></tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="seccion-eventos" style="display: none;">
+                    <h2 class="mb-4 fw-bold">Gestión Global de Eventos</h2>
+                    <div class="card card-form p-4">
+                        <div class="table-responsive">
+                            <table class="table table-hover align-middle">
+                                <thead class="table-dark">
+                                    <tr>
+                                        <th>ID</th>
+                                        <th>Evento</th>
+                                        <th>Fecha</th>
+                                        <th>Organizador</th>
+                                        <th>Acciones</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="tabla-eventos"></tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="seccion-ventas" style="display: none;">
+                    <h2 class="mb-4 fw-bold">Reporte de Ventas</h2>
+                    <div class="row mb-4">
+                        <div class="col-md-4">
+                            <div class="card bg-primary text-white p-3">
+                                <h5>Ingresos Totales</h5>
+                                <h3 fw-bold id="total-ingresos">S/ 0.00</h3>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="card bg-success text-white p-3">
+                                <h5>Tickets Vendidos</h5>
+                                <h3 fw-bold id="total-tickets">0</h3>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card card-form p-4">
+                        <div class="table-responsive">
+                            <table class="table table-hover align-middle">
+                                <thead class="table-dark">
+                                    <tr>
+                                        <th>#</th>
+                                        <th>Comprador</th>
+                                        <th>Evento</th>
+                                        <th>Zona</th>
+                                        <th>Precio</th>
+                                        <th>Fecha</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="tabla-ventas"></tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="seccion-editar-evento" style="display: none;">
+                    <div class="d-flex justify-content-between align-items-center mb-4">
+                        <h2 class="text-dark fw-bold">Editar Evento (Modo Admin)</h2>
+                        <button class="btn btn-secondary btn-sm" onclick="mostrarSeccion('eventos')">Cancelar</button>
+                    </div>
+
+                    <div class="card card-form p-4 border-warning border-2">
+                        <form id="form-editar">
+                            <input type="hidden" id="edit_id_evento">
+
+                            <div class="mb-3">
+                                <label class="fw-bold">Nombre del Evento</label>
+                                <input type="text" id="edit_nombre" class="form-control" required>
+                            </div>
+
+                            <div class="row mb-3">
+                                <div class="col-md-6">
+                                    <label class="fw-bold">Categoría</label>
+                                    <select id="edit_categoria" class="form-select" required>
+                                        <option value="Musica">Música</option>
+                                        <option value="Deportes">Deportes</option>
+                                        <option value="Teatro">Teatro</option>
+                                        <option value="Stand-up">Stand-up</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="fw-bold">Lugar</label>
+                                    <input type="text" id="edit_lugar" class="form-control" required>
+                                </div>
+                            </div>
+
+                            <div class="row mb-3">
+                                <div class="col-6">
+                                    <label class="fw-bold">Fecha</label>
+                                    <input type="date" id="edit_fecha" class="form-control" required>
+                                </div>
+                                <div class="col-6">
+                                    <label class="fw-bold">Hora</label>
+                                    <input type="time" id="edit_hora" class="form-control" required>
+                                </div>
+                            </div>
+
+                            <div class="row mb-3 p-3 bg-light rounded border mx-1">
+                                <h6 class="text-warning mb-3 fw-bold"><i class="bi bi-pencil-square"></i> Editar Ticket
+                                </h6>
+                                <div class="col-md-6">
+                                    <label class="fw-bold">Precio (S/.)</label>
+                                    <input type="number" id="edit_precio" class="form-control" step="0.01" required>
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="fw-bold">Stock Total</label>
+                                    <input type="number" id="edit_capacidad" class="form-control" required>
+                                </div>
+                            </div>
+
+                            <div class="mb-3">
+                                <label class="fw-bold">URL Imagen</label>
+                                <input type="url" id="edit_imagen" class="form-control">
+                            </div>
+                            <div class="mb-3">
+                                <label class="fw-bold">Descripción</label>
+                                <textarea id="edit_descripcion" class="form-control" rows="3" required></textarea>
+                            </div>
+
+                            <button type="button" class="btn btn-warning w-100 fw-bold"
+                                onclick="guardarEdicionEvento()">
+                                <i class="bi bi-save"></i> Guardar Cambios
+                            </button>
+                        </form>
+                    </div>
+                </div>
+
+            </main>
+        </div>
+    </div>
+
+    <div class="modal fade" id="detalleModal" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header bg-primary text-white">
+                    <h5 class="modal-title">Detalle</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div id="modal-contenido">Cargando...</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="crearUsuarioModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header bg-success text-white">
+                    <h5 class="modal-title">Nuevo Usuario</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="form-crear-usuario">
+                        <div class="row mb-3">
+                            <div class="col-6"><input type="text" id="new_nombre" class="form-control"
+                                    placeholder="Nombre"></div>
+                            <div class="col-6"><input type="text" id="new_apellido" class="form-control"
+                                    placeholder="Apellido"></div>
+                        </div>
+                        <div class="mb-3"><input type="email" id="new_correo" class="form-control" placeholder="Correo">
+                        </div>
+                        <div class="mb-3"><input type="text" id="new_password" class="form-control"
+                                placeholder="Contraseña"></div>
+                        <div class="mb-3"><input type="text" id="new_telefono" class="form-control"
+                                placeholder="Teléfono"></div>
+                        <div class="mb-3">
+                            <select id="new_rol" class="form-select">
+                                <option value="Cliente">Cliente</option>
+                                <option value="Organizador">Organizador</option>
+                            </select>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-success" onclick="guardarUsuario()">Guardar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+    <script>
+        function cerrarSesionAdmin() {
+            localStorage.clear();
+            window.location.href = '/';
+        }
+
+        function mostrarSeccion(seccion, link) {
+            ['seccion-usuarios', 'seccion-eventos', 'seccion-ventas', 'seccion-editar-evento'].forEach(id => {
+                document.getElementById(id).style.display = 'none';
+            });
+
+            document.querySelectorAll('.nav-link').forEach(l => l.classList.remove('active'));
+
+            if (seccion === 'usuarios') {
+                document.getElementById('seccion-usuarios').style.display = 'block';
+                cargarUsuarios();
+            } else if (seccion === 'eventos') {
+                document.getElementById('seccion-eventos').style.display = 'block';
+                cargarEventosAdmin();
+            } else if (seccion === 'ventas') {
+                document.getElementById('seccion-ventas').style.display = 'block';
+                cargarVentasAdmin();
+            } else if (seccion === 'editar-evento') {
+                document.getElementById('seccion-editar-evento').style.display = 'block';
+            }
+
+            if (link) link.classList.add('active');
+        }
+
+        async function cargarUsuarios() {
+            const tbody = document.getElementById('tabla-usuarios');
+            tbody.innerHTML = '<tr><td colspan="5" class="text-center">Cargando...</td></tr>';
+
+            try {
+                const res = await fetch('/api/admin/users');
+                const usuarios = await res.json();
+                tbody.innerHTML = '';
+
+                usuarios.forEach(u => {
+                    const badge = u.rol === 'Organizador' ? 'warning' : 'info';
+                    tbody.innerHTML += `
+                    <tr>
+                        <td>${u.id_usuario}</td>
+                        <td>${u.nombre} ${u.apellido}</td>
+                        <td>${u.correo}</td>
+                        <td><span class="badge bg-${badge} text-dark">${u.rol}</span></td>
+                        <td>
+                            <button class="btn btn-sm btn-primary me-2" onclick="verDetalle(${u.id_usuario})" title="Ver Detalles">
+                                <i class="bi bi-eye-fill"></i>
+                            </button>
+                            <button class="btn btn-sm btn-danger" onclick="eliminarUsuario(${u.id_usuario})" title="Eliminar Usuario">
+                                <i class="bi bi-trash-fill"></i>
+                            </button>
+                        </td>
+                    </tr>`;
+                });
+            } catch (e) { console.error(e); }
+        }
+
+        async function cargarEventosAdmin() {
+            const tbody = document.getElementById('tabla-eventos');
+            tbody.innerHTML = '<tr><td colspan="5" class="text-center">Cargando...</td></tr>';
+
+            try {
+                const res = await fetch('/api/admin/events');
+                const eventos = await res.json();
+                tbody.innerHTML = '';
+
+                eventos.forEach(e => {
+                    const fecha = new Date(e.fecha_evento).toLocaleDateString();
+                    tbody.innerHTML += `
+                    <tr>
+                        <td>${e.id_evento}</td>
+                        <td class="fw-bold">${e.nombre_evento}</td>
+                        <td>${fecha}</td>
+                        <td>${e.organizador}</td>
+                        <td>
+                            <button class="btn btn-sm btn-warning me-2" onclick="prepararEdicionEvento(${e.id_evento})" title="Editar Evento">
+                                <i class="bi bi-pencil-fill"></i>
+                            </button>
+                            <button class="btn btn-sm btn-danger" onclick="eliminarEvento(${e.id_evento})" title="Eliminar Evento">
+                                <i class="bi bi-trash-fill"></i>
+                            </button>
+                        </td>
+                    </tr>`;
+                });
+            } catch (e) { console.error(e); }
+        }
+
+        async function cargarVentasAdmin() {
+            const tbody = document.getElementById('tabla-ventas');
+            try {
+                const res = await fetch('/api/admin/sales');
+                const ventas = await res.json();
+                tbody.innerHTML = '';
+                let total = 0;
+                ventas.forEach(v => {
+                    total += parseFloat(v.precio);
+                    tbody.innerHTML += `<tr><td>#${v.id_ticket}</td><td>${v.comprador}<br><small>${v.correo}</small></td><td>${v.nombre_evento}</td><td>${v.nombre_zona}</td><td>S/ ${v.precio}</td><td>${new Date(v.fecha_compra).toLocaleDateString()}</td></tr>`;
+                });
+                document.getElementById('total-ingresos').textContent = 'S/ ' + total.toFixed(2);
+                document.getElementById('total-tickets').textContent = ventas.length;
+            } catch (e) { }
+        }
+
+        async function prepararEdicionEvento(id) {
+            try {
+                const res = await fetch(`/api/events/${id}`);
+                const ev = await res.json();
+
+                document.getElementById('edit_id_evento').value = ev.id_evento;
+                document.getElementById('edit_nombre').value = ev.nombre_evento;
+                document.getElementById('edit_categoria').value = ev.categoria;
+                document.getElementById('edit_lugar').value = ev.lugar;
+
+                if (ev.fecha_evento) {
+                    document.getElementById('edit_fecha').value = new Date(ev.fecha_evento).toISOString().split('T')[0];
+                }
+                document.getElementById('edit_hora').value = ev.hora_evento;
+
+                document.getElementById('edit_precio').value = ev.precio || 0;
+                document.getElementById('edit_capacidad').value = ev.capacidad || 0;
+
+                document.getElementById('edit_imagen').value = ev.imagen_url || '';
+                document.getElementById('edit_descripcion').value = ev.descripcion || '';
+
+                mostrarSeccion('editar-evento');
+
+            } catch (e) {
+                console.error(e);
+                alert('Error al cargar los datos del evento para editar.');
+            }
+        }
+
+        async function guardarEdicionEvento() {
+            const id = document.getElementById('edit_id_evento').value;
+            const data = {
+                nombre_evento: document.getElementById('edit_nombre').value,
+                categoria: document.getElementById('edit_categoria').value,
+                fecha_evento: document.getElementById('edit_fecha').value,
+                hora_evento: document.getElementById('edit_hora').value,
+                lugar: document.getElementById('edit_lugar').value,
+                imagen_url: document.getElementById('edit_imagen').value,
+                descripcion: document.getElementById('edit_descripcion').value,
+                precio: document.getElementById('edit_precio').value,
+                capacidad: document.getElementById('edit_capacidad').value
+            };
+
+            try {
+                const res = await fetch(`/api/events/update/${id}`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(data)
+                });
+
+                if (res.ok) {
+                    alert('Evento actualizado correctamente.');
+                    mostrarSeccion('eventos');
+                } else {
+                    alert('Error al actualizar.');
+                }
+            } catch (e) { alert('Error de conexión.'); }
+        }
+
+        async function eliminarUsuario(id) {
+            if (confirm('¿Eliminar usuario y todos sus datos?')) {
+                await fetch(`/api/admin/users/${id}`, { method: 'DELETE' });
+                cargarUsuarios();
+            }
+        }
+        async function eliminarEvento(id) {
+            if (confirm('¿Eliminar evento?')) {
+                await fetch(`/api/admin/events/${id}`, { method: 'DELETE' });
+                cargarEventosAdmin();
+            }
+        }
+
+        async function verDetalle(id) {
+            new bootstrap.Modal(document.getElementById('detalleModal')).show();
+            const cont = document.getElementById('modal-contenido');
+            cont.innerHTML = 'Cargando...';
+            const res = await fetch(`/api/admin/users/${id}/details`);
+            const data = await res.json();
+            if (data.items.length === 0) { cont.innerHTML = 'Sin registros.'; return; }
+            let html = '<table class="table"><thead><tr><th>Evento</th><th>Dato</th><th>Estado</th></tr></thead><tbody>';
+            data.items.forEach(i => {
+                html += `<tr><td>${i.nombre_evento}</td><td>${i.nombre_zona || i.lugar}</td><td>${i.estado}</td></tr>`;
+            });
+            cont.innerHTML = html + '</tbody></table>';
+        }
+
+        function abrirModalCrear() {
+            document.getElementById('form-crear-usuario').reset();
+            new bootstrap.Modal(document.getElementById('crearUsuarioModal')).show();
+        }
+
+        async function guardarUsuario() {
+            const data = {
+                nombre: document.getElementById('new_nombre').value,
+                apellido: document.getElementById('new_apellido').value,
+                correo: document.getElementById('new_correo').value,
+                contrasena: document.getElementById('new_password').value,
+                telefono: document.getElementById('new_telefono').value,
+                rol: document.getElementById('new_rol').value
+            };
+            if (!data.nombre || !data.correo) return alert('Datos incompletos');
+            await fetch('/api/admin/users/create', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(data) });
+            alert('Usuario creado');
+            location.reload();
+        }
+
+        document.addEventListener('DOMContentLoaded', () => cargarUsuarios());
+    </script>
+
+</body>
+
+</html>

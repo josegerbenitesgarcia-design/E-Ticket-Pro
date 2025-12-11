@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Registrarse</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="css/style.css">
+</head>
+
+<body class="page-login">
+
+    <div class="auth-container">
+        <div class="auth-header">
+            <a href="/login" class="auth-tab">Iniciar Sesión</a>
+            <a href="#" class="auth-tab active">Registrarse</a>
+        </div>
+
+        <form action="/auth/register" method="POST" id="registerForm" onsubmit="return validarRegistro()">
+
+            <div class="row">
+                <div class="col-6 mb-3">
+                    <label class="form-label text-muted small fw-bold">Nombre *</label>
+                    <input type="text" name="nombre" class="form-control form-control-modern" required>
+                </div>
+                <div class="col-6 mb-3">
+                    <label class="form-label text-muted small fw-bold">Apellido *</label>
+                    <input type="text" name="apellido" class="form-control form-control-modern" required>
+                </div>
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label text-muted small fw-bold">Email *</label>
+                <input type="email" name="email" id="emailInput" class="form-control form-control-modern"
+                    placeholder="ejemplo@correo.com" required>
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label text-muted small fw-bold">Teléfono (9 dígitos) *</label>
+                <input type="text" name="telefono" id="telInput" class="form-control form-control-modern"
+                    placeholder="999888777" oninput="this.value = this.value.replace(/[^0-9]/g, '').slice(0, 9)"
+                    required>
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label text-muted small fw-bold">Contraseña *</label>
+                <input type="password" name="password" id="passInput" class="form-control form-control-modern"
+                    minlength="6" placeholder="Mínimo 6 caracteres" required>
+            </div>
+
+            <div class="mb-4">
+                <label class="form-label text-muted small fw-bold">Quiero registrarme como: *</label>
+                <select name="rol" class="form-select form-control-modern border-primary" required>
+                    <option value="" disabled selected>-- Selecciona una opción --</option>
+                    <option value="Cliente">Cliente (Quiero comprar entradas)</option>
+                    <option value="Organizador">Organizador (Quiero vender eventos)</option>
+                </select>
+            </div>
+
+            <button type="submit" class="btn btn-purple w-100">Crear Cuenta</button>
+        </form>
+    </div>
+
+    <script>
+        function validarRegistro() {
+            const email = document.getElementById('emailInput').value;
+            const pass = document.getElementById('passInput').value;
+            const tel = document.getElementById('telInput').value;
+
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            if (!emailRegex.test(email)) {
+                alert("Por favor, introduce una dirección de correo válida.");
+                return false;
+            }
+
+            if (tel.length !== 9) {
+                alert("El teléfono debe tener exactamente 9 dígitos.");
+                return false;
+            }
+
+            if (pass.length < 6) {
+                alert("La contraseña debe tener al menos 6 caracteres.");
+                return false;
+            }
+
+            return true;
+        }
+    </script>
+
+</body>
+
+</html>

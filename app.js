@@ -47,8 +47,10 @@ app.use('/api/sales', require('./routes/saleRoutes'));
 
 const PORT = process.env.PORT || 3000;
 
-app.listen(PORT, () => {
-    console.log(`------------------------------------------------`);
-    console.log(`✅ Servidor corriendo en: http://localhost:${PORT}`);
-    console.log(`------------------------------------------------`);
-});
+if (require.main === module) {
+    app.listen(PORT, () => {
+        console.log(`✅ Servidor corriendo en http://localhost:${PORT}`);
+    });
+}
+
+module.exports = app;
